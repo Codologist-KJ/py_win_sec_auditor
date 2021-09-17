@@ -1,4 +1,4 @@
-#Clear-Host
+Clear-Host
 #RECORDING TRANSCRIPT TO DUMP FILE
 $CurrentDir = $PSScriptRoot
 $SystemName = $env:computername
