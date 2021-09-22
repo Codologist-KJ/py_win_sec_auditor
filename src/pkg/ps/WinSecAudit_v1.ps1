@@ -4,15 +4,13 @@ $CurrentDir = $PSScriptRoot
 $SystemName = $env:computername
 $DumpFilePath = "$CurrentDir\"+$SystemName+"-CONFIG_DUMP_$(get-date -Format yyyymmdd_hhmmtt).txt"
 
-Start-Transcript -Path $DumpFilePath -NoClobber #-UseMinimalHeader
-
 #Checking if your PowerShell Script Execution Policy
 Write-Host
-Write-Host 'Checking if your PowerShell Script Execution Policy is set to RemoteSigned' -ForegroundColor Yellow -BackgroundColor Black
+Write-Host 'Checking if your PowerShell Script Execution Policy is set to Unrestricted' -ForegroundColor Yellow -BackgroundColor Black
 Start-Sleep -s 5
 Write-Host
 $ExecutionPolicy = Get-ExecutionPolicy
-$ScriptExecution = "RemoteSigned"
+$ScriptExecution = "Unrestricted"
     If ($ExecutionPolicy -eq $ScriptExecution) 
         {
             Write-Host 'Yes! your PowerShell Script Execution Policy is already set to' $ExecutionPolicy -ForegroundColor Red -BackgroundColor Black
@@ -21,14 +19,14 @@ $ScriptExecution = "RemoteSigned"
         {
             Write-Host Your PowerShell Script Execution Policy is set to $ExecutionPolicy -ForegroundColor Yellow -BackgroundColor Black
             Write-Host
-            Write-Host 'This policy should be set to RemoteSigned for the script to execute properly.' -ForegroundColor Magenta -BackgroundColor Black
+            Write-Host 'This policy should be set to ' $ScriptExecution 'for the script to execute properly.' -ForegroundColor Magenta -BackgroundColor Black
             Write-Host
             Write-Host 'This change will be reverted back to its original state after script execution is complete.' -ForegroundColor Magenta -BackgroundColor Black
             Write-Host
             Write-Host Setting PowerShell Script Execution Policy to $ScriptExecution automatically. Please Wait...
             Start-Sleep -s 5
             
-            Set-ExecutionPolicy RemoteSigned -force
+            Set-ExecutionPolicy Unrestricted -Scope CurrentUser -Force
         
             Write-Host
             Write-Host PowerShell Script Execution Policy is now set to $ScriptExecution. -ForegroundColor Yellow -BackgroundColor Black
@@ -36,6 +34,8 @@ $ScriptExecution = "RemoteSigned"
         }
 
 #--------------
+
+Start-Transcript -Path $DumpFilePath -NoClobber #-UseMinimalHeader
 
 #Begin Windows Security Auditing Code
 "`n"
