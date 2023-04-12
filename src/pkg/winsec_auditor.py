@@ -5,23 +5,14 @@ from datetime import datetime
 from typing import List
 import subprocess
 
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description='Windows Security Event Log Auditor')
-    parser.add_argument('-l', '--logname', type=str, required=True, help='Windows Event Log name to be processed.')
-    parser.add_argument('-f', '--filter', type=str, required=True, help='Filter parameters for event logs.')
-    parser.add_argument('-o', '--output', type=str, required=True, help='Output file path for the exported CSV file.')
-    return parser.parse_args()
+def get_input() -> argparse.Namespace:
+    logname = input("Enter the Windows Event Log name to be processed (System, Security, Application): ")
+    start_time = input("Enter the start date and time to check the events from (format: YYYY-MM-DDTHH:MM:SS): ")
+    output = input("Enter the output file path for the exported CSV file: ")
+    return argparse.Namespace(logname=logname, start_time=start_time, output=output)
 
-def filter_parameters(filter: str) -> str:
-    filters = filter.split(';')
-    filter_hashtable = '@{'
-
-    for f in filters:
-        key, value = f.split('=')
-        filter_hashtable += f"{key}='{value}';"
-
-    filter_hashtable = filter_hashtable.rstrip(';')
-    filter_hashtable += '}'
+def filter_parameters(start_time: str) -> str:
+    filter_hashtable = f"@{{Logname='{logname}'; StartTime='{start_time}';}}"
     return filter_hashtable
 
 def export_event_logs(logname: str, filter_hashtable: str, output_file: str) -> None:
@@ -36,8 +27,8 @@ def export_event_logs(logname: str, filter_hashtable: str, output_file: str) -> 
         print(f"An error occurred while exporting {logname} event logs: {e}")
 
 def main() -> None:
-    args = parse_args()
-    filter_hashtable = filter_parameters(args.filter)
+    args = get_input()
+    filter_hashtable = filter_parameters(args.start_time)
     export_event_logs(args.logname, filter_hashtable, args.output)
 
 if __name__ == '__main__':
