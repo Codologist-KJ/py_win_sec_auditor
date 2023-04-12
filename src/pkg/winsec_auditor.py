@@ -1,52 +1,44 @@
+import os
+import csv
+import argparse
+from datetime import datetime
+from typing import List
 import subprocess
 
-#Defines the programs main menu
-def main_task_menu():
-    print("[1] Windows Security Audit")
-    print("[2] Task 2")
-    print("[3] Task 3")
-    print("[4] Task 4")
-    print("[0] Exit program.")
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description='Windows Security Event Log Auditor')
+    parser.add_argument('-l', '--logname', type=str, required=True, help='Windows Event Log name to be processed.')
+    parser.add_argument('-f', '--filter', type=str, required=True, help='Filter parameters for event logs.')
+    parser.add_argument('-o', '--output', type=str, required=True, help='Output file path for the exported CSV file.')
+    return parser.parse_args()
 
-#Windows Powershell Script location
-ps_script = ".\\ps\\WinSecAudit_v2.ps1"
+def filter_parameters(filter: str) -> str:
+    filters = filter.split(';')
+    filter_hashtable = '@{'
 
-#Defines module for running the Powershell script
-def run_pscript():
-    cmd = ["PowerShell", "-File", ps_script, "-Verb", "RunAs"] 
-    ec = subprocess.call(cmd)
-    print("Powershell returned: {0:d}".format(ec))
-    print("\nThe Windows security auditing process is complete...")
-    
+    for f in filters:
+        key, value = f.split('=')
+        filter_hashtable += f"{key}='{value}';"
 
-#Main menu for program      
-main_task_menu()
-main_option = int(input("Select your option: " ))
+    filter_hashtable = filter_hashtable.rstrip(';')
+    filter_hashtable += '}'
+    return filter_hashtable
 
-while main_option != 0:
-    if main_option == 1:
-        run_pscript()
-           
-    elif main_option == 2:
-        print("Main Task 2 has been called.")
+def export_event_logs(logname: str, filter_hashtable: str, output_file: str) -> None:
+    script = f"""
+    $Events = Get-WinEvent -FilterHashTable {filter_hashtable}
+    $Events | Export-Csv -Path {output_file} -NoTypeInformation
+    """
+    try:
+        subprocess.run(["powershell", "-Command", script], check=True)
+        print(f"Successfully exported {logname} event logs to {output_file}")
+    except subprocess.CalledProcessError as e:
+        print(f"An error occurred while exporting {logname} event logs: {e}")
 
-    elif main_option == 3:
-        print("Main Task 3 has been called.")
+def main() -> None:
+    args = parse_args()
+    filter_hashtable = filter_parameters(args.filter)
+    export_event_logs(args.logname, filter_hashtable, args.output)
 
-    elif main_option == 4:
-        print("Main Task 4 has been called.")
-
-    else:
-        #Message if a vaild option is not selected
-        print("You have not selected a valid option.")
-
-    print()
-    main_task_menu()
-    main_option = int(input("Select your option: " ))
- 
-exit()
-
-#Read and Process PowerShell Transcript Files
-
-
-#Return to Security Task Menu
+if __name__ == '__main__':
+    main()
