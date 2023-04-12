@@ -9,7 +9,7 @@ def main_task_menu():
     print("[0] Exit program.")
 
 #Windows Powershell Script location
-ps_script = ".\\ps\\WinSecAudit_v1.ps1"
+ps_script = ".\\ps\\WinSecAudit_v2.ps1"
 
 #Defines module for running the Powershell script
 def run_pscript():
