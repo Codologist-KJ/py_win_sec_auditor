@@ -21,12 +21,15 @@
 [CmdletBinding()]
 param (
     [Parameter(Mandatory=$true, HelpMessage="Enter the Windows Event Log name to be processed.")]
+    [ValidateNotNullOrEmpty()]
     [string]$LogName,
 
     [Parameter(Mandatory=$true, HelpMessage="Enter the hashtable with filtering parameters.")]
+    [ValidateNotNullOrEmpty()]
     [hashtable]$FilterHashTable,
 
     [Parameter(Mandatory=$true, HelpMessage="Enter the output file path for the exported CSV file.")]
+    [ValidateNotNullOrEmpty()]
     [string]$OutputFile
 )
 
@@ -38,13 +41,15 @@ function Export-EventLogs {
     )
 
     try {
+        Write-Verbose "Retrieving event logs for $LogName with filters $FilterHashTable"
         $Events = Get-WinEvent -FilterHashTable $FilterHashTable
+        Write-Verbose "Exporting event logs to $OutputFile"
         $Events | Export-Csv -Path $OutputFile -NoTypeInformation
 
-        Write-Host "Successfully exported $LogName event logs to $OutputFile" -ForegroundColor Green
+        Write-Information "Successfully exported $LogName event logs to $OutputFile" -InformationAction Continue
     }
     catch {
-        Write-Host "An error occurred while exporting $LogName event logs: $_" -ForegroundColor Red
+        Write-Error "An error occurred while exporting $LogName event logs: $_"
     }
 }
 
